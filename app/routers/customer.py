@@ -244,13 +244,13 @@ async def send_registration_otp(
     )
 
     await aiosmtplib.send(
-        message,
-        hostname=os.getenv("SMTP_HOST"),
-        port=int(os.getenv("SMTP_PORT", 587)),
-        username=os.getenv("SMTP_EMAIL"),
-        password=os.getenv("SMTP_PASSWORD"),
-        start_tls=True
-    )
+    message,
+    hostname=os.getenv("SMTP_HOST"),
+    port=465,
+    username=os.getenv("SMTP_EMAIL"),
+    password=os.getenv("SMTP_PASSWORD"),
+    use_tls=True
+)
 
     return {
         "success": True,
