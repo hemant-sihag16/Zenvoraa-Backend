@@ -234,23 +234,39 @@ async def send_registration_otp(
     db.add(new_otp)
     db.commit()
 
-    message = EmailMessage()
-    message["From"] = os.getenv("SMTP_EMAIL")
-    message["To"] = email
-    message["Subject"] = "Zenvoraa Registration OTP"
-    message.set_content(
-        f"Your Zenvoraa registration OTP is: {otp}\n\n"
-        "This OTP is valid for 5 minutes."
+    resend_api_key = os.getenv("RESEND_API_KEY")
+
+    if not resend_api_key:
+        raise HTTPException(
+            status_code=500,
+            detail="Email service is not configured"
+        )
+
+    response = requests.post(
+        "https://api.resend.com/emails",
+        headers={
+            "Authorization": f"Bearer {resend_api_key}",
+            "Content-Type": "application/json"
+        },
+        json={
+            "from": "Zenvoraa <onboarding@resend.dev>",
+            "to": [email],
+            "subject": "Zenvoraa Registration OTP",
+            "html": f"""
+                <h2>Zenvoraa Registration</h2>
+                <p>Your registration OTP is:</p>
+                <h1>{otp}</h1>
+                <p>This OTP is valid for 5 minutes.</p>
+            """
+        },
+        timeout=20
     )
 
-    await aiosmtplib.send(
-    message,
-    hostname=os.getenv("SMTP_HOST"),
-    port=465,
-    username=os.getenv("SMTP_EMAIL"),
-    password=os.getenv("SMTP_PASSWORD"),
-    use_tls=True
-)
+    if response.status_code >= 400:
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to send OTP email"
+        )
 
     return {
         "success": True,

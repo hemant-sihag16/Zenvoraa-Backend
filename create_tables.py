@@ -2,6 +2,7 @@ from app.database.connection import engine, Base
 from app.models.property import Property
 from app.models.customer import Customer
 from app.models.enquiry import Enquiry
+from app.models.otp import CustomerOTP
 
 
 print("Creating tables...")
