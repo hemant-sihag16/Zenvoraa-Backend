@@ -9,6 +9,7 @@ from app.models.otp import CustomerOTP
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+import requests
 
 from app.database.connection import SessionLocal
 from app.models.customer import Customer
