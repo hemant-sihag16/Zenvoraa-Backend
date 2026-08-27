@@ -1,3 +1,12 @@
+import os
+import random
+from datetime import datetime, timedelta
+
+import aiosmtplib
+from email.message import EmailMessage
+
+from app.models.otp import CustomerOTP
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -189,4 +198,61 @@ def get_customer_enquiries(
         "success": True,
         "count": len(data),
         "enquiries": data
+    }
+# =========================
+# SEND REGISTRATION OTP
+# =========================
+
+@router.post("/customers/send-otp")
+async def send_registration_otp(
+    email: str,
+    db: Session = Depends(get_db)
+):
+    existing_customer = db.query(Customer).filter(
+        Customer.email == email
+    ).first()
+
+    if existing_customer:
+        raise HTTPException(
+            status_code=400,
+            detail="Email already registered"
+        )
+
+    otp = str(random.randint(100000, 999999))
+
+    # Remove old OTPs for this email
+    db.query(CustomerOTP).filter(
+        CustomerOTP.email == email
+    ).delete()
+
+    new_otp = CustomerOTP(
+        email=email,
+        otp=otp,
+        expires_at=datetime.utcnow() + timedelta(minutes=5)
+    )
+
+    db.add(new_otp)
+    db.commit()
+
+    message = EmailMessage()
+    message["From"] = os.getenv("SMTP_EMAIL")
+    message["To"] = email
+    message["Subject"] = "Zenvoraa Registration OTP"
+    message.set_content(
+        f"Your Zenvoraa registration OTP is: {otp}\n\n"
+        "This OTP is valid for 5 minutes."
+    )
+
+    await aiosmtplib.send(
+        message,
+        hostname=os.getenv("SMTP_HOST"),
+        port=int(os.getenv("SMTP_PORT", 587)),
+        username=os.getenv("SMTP_EMAIL"),
+        password=os.getenv("SMTP_PASSWORD"),
+        start_tls=True
+    )
+
+    return {
+        "success": True,
+        "message": "OTP sent successfully"
     }
