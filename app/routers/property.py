@@ -178,7 +178,7 @@ def get_property(
             "area": property.area,
             "purpose": property.purpose,
             "status": property.status,
-            "image_url": p.image_url,
+            "image_url": property.image_url,
         }
     }
 
@@ -274,7 +274,54 @@ def update_property(
             "customer_id": property.customer_id
         }
     }
+# UPDATE PROPERTY STATUS
+@router.put("/properties/{property_id}/status")
+def update_property_status(
+    property_id: int,
+    status: str,
+    customer_id: int,
+    db: Session = Depends(get_db)
+):
 
+    property = db.query(Property).filter(
+        Property.id == property_id
+    ).first()
+
+    if not property:
+        return {
+            "success": False,
+            "message": "Property not found"
+        }
+
+    # Security: only property owner can change status
+    if property.customer_id != customer_id:
+        return {
+            "success": False,
+            "message": "You can only update your own property"
+        }
+
+    status = status.lower()
+
+    if status not in ["available", "rented", "sold"]:
+        return {
+            "success": False,
+            "message": "Status must be available, rented or sold"
+        }
+
+    property.status = status.capitalize()
+
+    db.commit()
+    db.refresh(property)
+
+    return {
+        "success": True,
+        "message": "Property status updated successfully",
+        "property": {
+            "id": property.id,
+            "title": property.title,
+            "status": property.status
+        }
+    }
 # DELETE PROPERTY
 @router.delete("/properties/{property_id}")
 def delete_property(
@@ -328,6 +375,7 @@ def get_customer_properties(
             "bedrooms": p.bedrooms,
             "area": p.area,
             "purpose": p.purpose,
+            "status": p.status,
             "image_url": p.image_url,
             "customer_id": p.customer_id,
             "status": p.status,
