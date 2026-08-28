@@ -96,11 +96,14 @@ def customer_login(
         detail="Invalid email or password"
     )
 
-    if existing_customer.password != customer.password:
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid email or password"
-        )
+    if not pwd_context.verify(
+    customer.password,
+    existing_customer.password
+):
+     raise HTTPException(
+        status_code=401,
+        detail="Invalid email or password"
+    )
 
     return {
         "success": True,
