@@ -1,9 +1,18 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database.connection import SessionLocal
 from app.models.property import Property
 from app.schemas.property import PropertyCreate
+import cloudinary
+import cloudinary.uploader
+import os
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET")
+)
 
 router = APIRouter(tags=["Properties"])
 
@@ -387,3 +396,26 @@ def get_customer_properties(
         "count": len(data),
         "properties": data
     }
+@router.post("/properties/upload-image")
+async def upload_property_image(
+    file: UploadFile = File(...)
+):
+    try:
+        contents = await file.read()
+
+        result = cloudinary.uploader.upload(
+            contents,
+            folder="zenvoraa/properties"
+        )
+
+        return {
+            "success": True,
+            "message": "Image uploaded successfully",
+            "image_url": result["secure_url"]
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Image upload failed: {str(e)}"
+        )
