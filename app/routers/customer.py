@@ -276,7 +276,7 @@ async def send_registration_otp(
 
     if response.status_code >= 400:
      print("OTP API STATUS:", response.status_code)
-     print("OTP API RESPONSE:", response.text)
+    print("OTP API RESPONSE:", response.text)
 
     raise HTTPException(
         status_code=500,
@@ -284,6 +284,6 @@ async def send_registration_otp(
     )
 
     return {
-        "success": True,
-        "message": "OTP sent successfully"
-    }
+    "success": True,
+    "message": "OTP sent successfully"
+}
