@@ -15,7 +15,12 @@ from app.database.connection import SessionLocal
 from app.models.customer import Customer
 from app.models.enquiry import Enquiry
 from app.schemas.customer import CustomerCreate, CustomerLogin
+from passlib.context import CryptContext
 
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto"
+)
 router = APIRouter(tags=["Customers"])
 
 
@@ -50,7 +55,7 @@ def create_customer(
         name=customer.name,
         email=customer.email,
         phone=customer.phone,
-        password=customer.password
+        password=pwd_context.hash(customer.password)
     )
 
     db.add(new_customer)
@@ -82,11 +87,14 @@ def customer_login(
         Customer.email == customer.email
     ).first()
 
-    if not existing_customer:
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid email or password"
-        )
+    if not pwd_context.verify(
+    customer.password,
+    existing_customer.password
+):
+     raise HTTPException(
+        status_code=401,
+        detail="Invalid email or password"
+    )
 
     if existing_customer.password != customer.password:
         raise HTTPException(
