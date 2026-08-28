@@ -262,7 +262,7 @@ async def send_registration_otp(
         },
         json={
             "from": "Zenvoraa <onboarding@resend.dev>",
-            "to": [email],
+            "to": ["hemantsihag5@gmail.com"],
             "subject": "Zenvoraa Registration OTP",
             "html": f"""
                 <h2>Zenvoraa Registration</h2>
