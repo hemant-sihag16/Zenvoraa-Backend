@@ -515,9 +515,9 @@ def get_platform_overview_stats(
 def seed_default_owner(
     db: Session = Depends(get_db)
 ):
-    # Primary Website Owner: zenvoraa.support@gmail.com
-    owner_email = "zenvoraa.support@gmail.com"
-    owner_phone = "905078815"
+    # Primary Website Owner: govindkasnia42@gmail.com
+    owner_email = "govindkasnia42@gmail.com"
+    owner_phone = "9876543210"
     owner_pass = "Sihag@95186"
 
     owner = db.query(Customer).filter(
@@ -526,7 +526,7 @@ def seed_default_owner(
 
     if not owner:
         owner = Customer(
-            name="Hemant Sihag (Zenvoraa Owner)",
+            name="Govind Kasnia (Zenvoraa Owner)",
             email=owner_email,
             phone=owner_phone,
             password=pwd_context.hash(owner_pass),
@@ -545,6 +545,7 @@ def seed_default_owner(
             "role": "super_admin"
         }
     else:
+        owner.name = "Govind Kasnia (Zenvoraa Owner)"
         owner.role = "super_admin"
         owner.email = owner_email
         owner.phone = owner_phone
