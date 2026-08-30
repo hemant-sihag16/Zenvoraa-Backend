@@ -277,10 +277,15 @@ def customer_login(
     db: Session = Depends(get_db)
 ):
     login_id = customer.email.strip().lower()
+    clean_phone = login_id.replace("+91", "").strip()
+    with_plus91 = f"+91{clean_phone}" if clean_phone.isdigit() else login_id
 
-    # Support login by email or phone
+    # Support login by email or phone (with or without +91)
     existing_customer = db.query(Customer).filter(
-        (Customer.email == login_id) | (Customer.phone == login_id)
+        (Customer.email == login_id) |
+        (Customer.phone == login_id) |
+        (Customer.phone == clean_phone) |
+        (Customer.phone == with_plus91)
     ).first()
 
     if not existing_customer:
@@ -510,13 +515,21 @@ def get_platform_overview_stats(
 def seed_default_owner(
     db: Session = Depends(get_db)
 ):
-    owner = db.query(Customer).filter(Customer.email == "owner@zenvoraa.com").first()
+    # Primary Website Owner: zenvoraa.support@gmail.com
+    owner_email = "zenvoraa.support@gmail.com"
+    owner_phone = "905078815"
+    owner_pass = "Sihag@95186"
+
+    owner = db.query(Customer).filter(
+        (Customer.email == owner_email) | (Customer.phone == owner_phone)
+    ).first()
+
     if not owner:
         owner = Customer(
-            name="Website Owner",
-            email="owner@zenvoraa.com",
-            phone="+919876543210",
-            password=pwd_context.hash("Owner@12345"),
+            name="Hemant Sihag (Zenvoraa Owner)",
+            email=owner_email,
+            phone=owner_phone,
+            password=pwd_context.hash(owner_pass),
             role="super_admin",
             city="Jaipur",
             location="Headquarters, Jaipur"
@@ -526,16 +539,22 @@ def seed_default_owner(
         db.refresh(owner)
         return {
             "success": True,
-            "message": "Default Super Admin / Website Owner created",
-            "email": "owner@zenvoraa.com",
+            "message": "Website Owner (Super Admin) account created successfully 🎉",
+            "email": owner_email,
+            "phone": owner_phone,
             "role": "super_admin"
         }
     else:
         owner.role = "super_admin"
+        owner.email = owner_email
+        owner.phone = owner_phone
+        owner.password = pwd_context.hash(owner_pass)
         db.commit()
         return {
             "success": True,
-            "message": "Super Admin already exists and verified",
+            "message": "Website Owner account updated to Super Admin with latest password 🎉",
             "email": owner.email,
+            "phone": owner.phone,
             "role": owner.role
-        }
+        }
+
