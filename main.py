@@ -81,7 +81,7 @@ def seed_owner_on_startup():
         # 3. Update user #4 if exists (rename Govind Kasnia to Hemant Sihag)
         user_4 = db.query(Customer).filter(Customer.id == 4).first()
         if user_4:
-            user_4.name = "Hemant Sihag"
+            user_4.name = "Hemant Sihag (Zenvoraa Owner)"
             user_4.email = "hemantsihag42@gmail.com"
             user_4.phone = "9050978815"
             user_4.city = "Sirsa"
@@ -90,7 +90,7 @@ def seed_owner_on_startup():
         # 4. Update user #1 if exists (Hemant Sihag super_admin)
         user_1 = db.query(Customer).filter(Customer.id == 1).first()
         if user_1:
-            user_1.name = "Hemant Sihag"
+            user_1.name = "Hemant Sihag (Zenvoraa Owner)"
             user_1.role = "super_admin"
             user_1.phone = "9050978815"
             user_1.city = "Sirsa"
@@ -101,7 +101,7 @@ def seed_owner_on_startup():
         ).all()
         for g in govind_entries:
             if "astha" not in g.email.lower():
-                g.name = "Hemant Sihag"
+                g.name = "Hemant Sihag (Zenvoraa Owner)"
                 g.email = g.email.replace("govindkasnia42", "hemantsihag42").replace("govind", "hemantsihag")
                 g.phone = "9050978815"
                 g.city = "Sirsa"
