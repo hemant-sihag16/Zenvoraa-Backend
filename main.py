@@ -68,20 +68,49 @@ def seed_owner_on_startup():
     """Auto-seed or update the Website Owner (Super Admin) credentials on startup"""
     try:
         db = SessionLocal()
-        # Delete user #9 if exists
+        # 1. Delete user #9 if exists
         db.query(Customer).filter(Customer.id == 9).delete()
 
-        # Update user #8 if exists
+        # 2. Update user #8 if exists (mobile: 9050978815, city: Sirsa)
         user_8 = db.query(Customer).filter(Customer.id == 8).first()
         if user_8:
             user_8.phone = "9050978815"
             user_8.city = "Sirsa"
             user_8.location = "Sirsa, Haryana, India"
 
+        # 3. Update user #4 if exists (rename Govind Kasnia to Hemant Sihag)
+        user_4 = db.query(Customer).filter(Customer.id == 4).first()
+        if user_4:
+            user_4.name = "Hemant Sihag"
+            user_4.email = "hemantsihag42@gmail.com"
+            user_4.phone = "9050978815"
+            user_4.city = "Sirsa"
+            user_4.location = "Sirsa, Haryana, India"
+
+        # 4. Update user #1 if exists (Hemant Sihag super_admin)
+        user_1 = db.query(Customer).filter(Customer.id == 1).first()
+        if user_1:
+            user_1.name = "Hemant Sihag"
+            user_1.role = "super_admin"
+            user_1.phone = "9050978815"
+            user_1.city = "Sirsa"
+
+        # 5. Rename any remaining Govind Kasnia / govindkasnia entries (excluding Astha)
+        govind_entries = db.query(Customer).filter(
+            (Customer.name.ilike("%Govind%")) | (Customer.email.ilike("%govindkasnia%"))
+        ).all()
+        for g in govind_entries:
+            if "astha" not in g.email.lower():
+                g.name = "Hemant Sihag"
+                g.email = g.email.replace("govindkasnia42", "hemantsihag42").replace("govind", "hemantsihag")
+                g.phone = "9050978815"
+                g.city = "Sirsa"
+                g.location = "Sirsa, Haryana, India"
+
         owner_accounts = [
-            {"email": "zenvoraa.support@gmail.com", "phone": "9050978815", "name": "Zenvoraa Official Support (Owner)"},
+            {"email": "zenvoraa.support@gmail.com", "phone": "9050978815", "name": "Hemant Sihag (Zenvoraa Owner)"},
             {"email": "hemantsihag42@gmail.com", "phone": "9050978815", "name": "Hemant Sihag (Zenvoraa Owner)"},
-            {"email": "owner@zenvoraa.com", "phone": "9000000000", "name": "Hemant Sihag (Zenvoraa Owner)"}
+            {"email": "hemantsihag5@gmail.com", "phone": "9050978815", "name": "Hemant Sihag (Zenvoraa Owner)"}
         ]
         owner_pass = "Sihag@95186"
         hashed = pwd_context.hash(owner_pass)
@@ -106,17 +135,6 @@ def seed_owner_on_startup():
                 owner.city = "Sirsa"
                 owner.location = "Sirsa, Haryana, India"
                 owner.password = hashed
-
-        # Also rename any old Govind Kasnia entries or govind email if present
-        govind_entries = db.query(Customer).filter(
-            (Customer.name.like("%Govind%")) | (Customer.email.like("%govind%"))
-        ).all()
-        for g in govind_entries:
-            g.name = "Hemant Sihag (Zenvoraa Owner)"
-            g.email = "hemantsihag42@gmail.com"
-            g.phone = "9050978815"
-            g.city = "Sirsa"
-            g.location = "Sirsa, Haryana, India"
 
         db.commit()
         db.close()
