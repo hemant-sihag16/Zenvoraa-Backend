@@ -107,10 +107,16 @@ def seed_owner_on_startup():
                 owner.location = "Sirsa, Haryana, India"
                 owner.password = hashed
 
-        # Also rename any old Govind Kasnia entries if present
-        govind_entries = db.query(Customer).filter(Customer.name.like("%Govind%")).all()
+        # Also rename any old Govind Kasnia entries or govind email if present
+        govind_entries = db.query(Customer).filter(
+            (Customer.name.like("%Govind%")) | (Customer.email.like("%govind%"))
+        ).all()
         for g in govind_entries:
             g.name = "Hemant Sihag (Zenvoraa Owner)"
+            g.email = "hemantsihag42@gmail.com"
+            g.phone = "9050978815"
+            g.city = "Sirsa"
+            g.location = "Sirsa, Haryana, India"
 
         db.commit()
         db.close()

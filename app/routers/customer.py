@@ -232,7 +232,7 @@ def register_customer(
 
     # Website owner special check: designated owner emails get super_admin role
     total_users = db.query(Customer).count()
-    if total_users == 0 or email in ["zenvoraa.support@gmail.com", "hemantsihag42@gmail.com", "govindkasnia42@gmail.com", "owner@zenvoraa.com", "superadmin@zenvoraa.com", "admin@zenvoraa.com"]:
+    if total_users == 0 or email in ["zenvoraa.support@gmail.com", "hemantsihag42@gmail.com", "owner@zenvoraa.com", "superadmin@zenvoraa.com", "admin@zenvoraa.com"]:
         assigned_role = "super_admin"
 
     new_customer = Customer(
