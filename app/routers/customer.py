@@ -232,7 +232,7 @@ def register_customer(
 
     # Website owner special check: designated owner emails get super_admin role
     total_users = db.query(Customer).count()
-    if total_users == 0 or email in ["zenvoraa.support@gmail.com", "govindkasnia42@gmail.com", "owner@zenvoraa.com", "superadmin@zenvoraa.com", "admin@zenvoraa.com"]:
+    if total_users == 0 or email in ["zenvoraa.support@gmail.com", "hemantsihag42@gmail.com", "govindkasnia42@gmail.com", "owner@zenvoraa.com", "superadmin@zenvoraa.com", "admin@zenvoraa.com"]:
         assigned_role = "super_admin"
 
     new_customer = Customer(
@@ -382,7 +382,31 @@ def get_customer(
 
 
 # ==========================================
-# 7. UPDATE USER ROLE (SUPER ADMIN / OWNER ONLY)
+# 7. DELETE USER BY ID (SUPER ADMIN / OWNER ONLY)
+# ==========================================
+@router.delete("/customers/{customer_id}")
+def delete_customer(
+    customer_id: int,
+    db: Session = Depends(get_db)
+):
+    customer = db.query(Customer).filter(Customer.id == customer_id).first()
+    if not customer:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Clean up associated enquiries and properties
+    db.query(Enquiry).filter(Enquiry.customer_id == customer_id).delete()
+    db.query(Property).filter(Property.customer_id == customer_id).delete()
+    db.delete(customer)
+    db.commit()
+
+    return {
+        "success": True,
+        "message": f"User #{customer_id} ({customer.name}) deleted successfully"
+    }
+
+
+# ==========================================
+# 8. UPDATE USER ROLE (SUPER ADMIN / OWNER ONLY)
 # ==========================================
 @router.put("/customers/{customer_id}/role")
 def update_user_role(
@@ -418,7 +442,7 @@ def update_user_role(
 
 
 # ==========================================
-# 8. UPDATE PROFILE
+# 9. UPDATE PROFILE
 # ==========================================
 @router.put("/customers/{customer_id}/profile")
 def update_customer_profile(
@@ -464,7 +488,7 @@ def update_customer_profile(
 
 
 # ==========================================
-# 9. PLATFORM OVERVIEW & ANALYTICS STATS
+# 10. PLATFORM OVERVIEW & ANALYTICS STATS
 # ==========================================
 @router.get("/customers/stats/overview")
 def get_platform_overview_stats(
@@ -509,15 +533,15 @@ def get_platform_overview_stats(
 
 
 # ==========================================
-# 10. SEED DEFAULT OWNER ACCOUNT
+# 11. SEED DEFAULT OWNER ACCOUNT
 # ==========================================
 @router.post("/customers/seed-owner")
 def seed_default_owner(
     db: Session = Depends(get_db)
 ):
-    # Primary Website Owner: govindkasnia42@gmail.com
-    owner_email = "govindkasnia42@gmail.com"
-    owner_phone = "9876543210"
+    # Primary Website Owner: Hemant Sihag
+    owner_email = "hemantsihag42@gmail.com"
+    owner_phone = "9050978815"
     owner_pass = "Sihag@95186"
 
     owner = db.query(Customer).filter(
@@ -526,13 +550,13 @@ def seed_default_owner(
 
     if not owner:
         owner = Customer(
-            name="Govind Kasnia (Zenvoraa Owner)",
+            name="Hemant Sihag (Zenvoraa Owner)",
             email=owner_email,
             phone=owner_phone,
             password=pwd_context.hash(owner_pass),
             role="super_admin",
-            city="Jaipur",
-            location="Headquarters, Jaipur"
+            city="Sirsa",
+            location="Sirsa, Haryana, India"
         )
         db.add(owner)
         db.commit()
@@ -545,11 +569,13 @@ def seed_default_owner(
             "role": "super_admin"
         }
     else:
-        owner.name = "Govind Kasnia (Zenvoraa Owner)"
+        owner.name = "Hemant Sihag (Zenvoraa Owner)"
         owner.role = "super_admin"
         owner.email = owner_email
         owner.phone = owner_phone
         owner.password = pwd_context.hash(owner_pass)
+        owner.city = "Sirsa"
+        owner.location = "Sirsa, Haryana, India"
         db.commit()
         return {
             "success": True,

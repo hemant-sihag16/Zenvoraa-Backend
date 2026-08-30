@@ -68,10 +68,20 @@ def seed_owner_on_startup():
     """Auto-seed or update the Website Owner (Super Admin) credentials on startup"""
     try:
         db = SessionLocal()
+        # Delete user #9 if exists
+        db.query(Customer).filter(Customer.id == 9).delete()
+
+        # Update user #8 if exists
+        user_8 = db.query(Customer).filter(Customer.id == 8).first()
+        if user_8:
+            user_8.phone = "9050978815"
+            user_8.city = "Sirsa"
+            user_8.location = "Sirsa, Haryana, India"
+
         owner_accounts = [
-            {"email": "zenvoraa.support@gmail.com", "phone": "905078815", "name": "Zenvoraa Official Support (Owner)"},
-            {"email": "govindkasnia42@gmail.com", "phone": "9876543210", "name": "Govind Kasnia (Zenvoraa Owner)"},
-            {"email": "owner@zenvoraa.com", "phone": "9000000000", "name": "Zenvoraa Super Admin"}
+            {"email": "zenvoraa.support@gmail.com", "phone": "9050978815", "name": "Zenvoraa Official Support (Owner)"},
+            {"email": "hemantsihag42@gmail.com", "phone": "9050978815", "name": "Hemant Sihag (Zenvoraa Owner)"},
+            {"email": "owner@zenvoraa.com", "phone": "9000000000", "name": "Hemant Sihag (Zenvoraa Owner)"}
         ]
         owner_pass = "Sihag@95186"
         hashed = pwd_context.hash(owner_pass)
@@ -85,17 +95,26 @@ def seed_owner_on_startup():
                     phone=acc["phone"],
                     password=hashed,
                     role="super_admin",
-                    city="Jaipur",
-                    location="Zenvoraa Headquarters, Jaipur"
+                    city="Sirsa",
+                    location="Sirsa, Haryana, India"
                 )
                 db.add(owner)
             else:
                 owner.name = acc["name"]
                 owner.role = "super_admin"
+                owner.phone = acc["phone"]
+                owner.city = "Sirsa"
+                owner.location = "Sirsa, Haryana, India"
                 owner.password = hashed
+
+        # Also rename any old Govind Kasnia entries if present
+        govind_entries = db.query(Customer).filter(Customer.name.like("%Govind%")).all()
+        for g in govind_entries:
+            g.name = "Hemant Sihag (Zenvoraa Owner)"
+
         db.commit()
         db.close()
-        print("🚀 Primary Website Owners seeded/updated: zenvoraa.support@gmail.com & govindkasnia42@gmail.com")
+        print("🚀 Primary Website Owner updated: Hemant Sihag (zenvoraa.support@gmail.com)")
     except Exception as e:
         print(f"Seed notice: {e}")
 
