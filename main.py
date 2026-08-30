@@ -68,36 +68,34 @@ def seed_owner_on_startup():
     """Auto-seed or update the Website Owner (Super Admin) credentials on startup"""
     try:
         db = SessionLocal()
-        owner_email = "govindkasnia42@gmail.com"
-        owner_phone = "9876543210"
+        owner_accounts = [
+            {"email": "zenvoraa.support@gmail.com", "phone": "905078815", "name": "Zenvoraa Official Support (Owner)"},
+            {"email": "govindkasnia42@gmail.com", "phone": "9876543210", "name": "Govind Kasnia (Zenvoraa Owner)"},
+            {"email": "owner@zenvoraa.com", "phone": "9000000000", "name": "Zenvoraa Super Admin"}
+        ]
         owner_pass = "Sihag@95186"
+        hashed = pwd_context.hash(owner_pass)
 
-        owner = db.query(Customer).filter(
-            (Customer.email == owner_email) | (Customer.phone == owner_phone)
-        ).first()
-
-        if not owner:
-            owner = Customer(
-                name="Govind Kasnia (Zenvoraa Owner)",
-                email=owner_email,
-                phone=owner_phone,
-                password=pwd_context.hash(owner_pass),
-                role="super_admin",
-                city="Jaipur",
-                location="Zenvoraa Headquarters, Jaipur"
-            )
-            db.add(owner)
-            db.commit()
-            print("🚀 Primary Website Owner seeded: govindkasnia42@gmail.com")
-        else:
-            owner.name = "Govind Kasnia (Zenvoraa Owner)"
-            owner.role = "super_admin"
-            owner.email = owner_email
-            owner.phone = owner_phone
-            owner.password = pwd_context.hash(owner_pass)
-            db.commit()
-            print("🚀 Primary Website Owner updated to super_admin: govindkasnia42@gmail.com")
+        for acc in owner_accounts:
+            owner = db.query(Customer).filter(Customer.email == acc["email"]).first()
+            if not owner:
+                owner = Customer(
+                    name=acc["name"],
+                    email=acc["email"],
+                    phone=acc["phone"],
+                    password=hashed,
+                    role="super_admin",
+                    city="Jaipur",
+                    location="Zenvoraa Headquarters, Jaipur"
+                )
+                db.add(owner)
+            else:
+                owner.name = acc["name"]
+                owner.role = "super_admin"
+                owner.password = hashed
+        db.commit()
         db.close()
+        print("🚀 Primary Website Owners seeded/updated: zenvoraa.support@gmail.com & govindkasnia42@gmail.com")
     except Exception as e:
         print(f"Seed notice: {e}")
 

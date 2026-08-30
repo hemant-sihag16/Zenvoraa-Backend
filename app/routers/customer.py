@@ -230,9 +230,9 @@ def register_customer(
     # Allowed initial self-registration roles: customer or house_owner
     assigned_role = customer.role if customer.role in ["customer", "house_owner", "admin", "super_admin"] else "customer"
 
-    # Website owner special check: first user or owner@zenvoraa can be super_admin
+    # Website owner special check: designated owner emails get super_admin role
     total_users = db.query(Customer).count()
-    if total_users == 0 or email in ["owner@zenvoraa.com", "superadmin@zenvoraa.com", "admin@zenvoraa.com"]:
+    if total_users == 0 or email in ["zenvoraa.support@gmail.com", "govindkasnia42@gmail.com", "owner@zenvoraa.com", "superadmin@zenvoraa.com", "admin@zenvoraa.com"]:
         assigned_role = "super_admin"
 
     new_customer = Customer(
